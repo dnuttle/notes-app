@@ -1,0 +1,22 @@
+[
+  {
+    "docid":"1526770000000",
+    "category":"General",
+    "title":"nmcli",
+    "tags":"linux shell script bash network",
+    "document":"# nmcli command\nnmcli"},
+  {
+    "docid":"1526770000100",
+    "category":"General",
+    "title":"kafka notes",
+    "tags":"kafka",
+    "document":"# Kafka notes\nUsing kafka"
+  },
+  {
+    "docid":"1526770000200",
+    "category":"General",
+    "title":"consul notes",
+    "tags":"consul",
+    "document":"# consul  notes\n# Services\n# Key-Value pairs"
+  }
+]

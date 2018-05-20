@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "docid": {
+      "type":"string",
+      "index":"not_analyzed"
+    },
+    "title": {
+      "type":"string"
+    },
+    "category": {
+      "type":"string",
+      "index":"not_analyzed"
+    },
+    "tags": {
+      "type":"string"
+    },
+    "document": {
+      "type":"string"
+    }
+  }
+}
