@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Iterator;
 
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -18,7 +19,7 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.metadata.MetaData;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+//import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -27,26 +28,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 @Service
-public class ESTransport {
-
-  private static final Logger LOG = LoggerFactory.getLogger(ESTransport.class);
+public class ESUtilImpl_2_4 /*implements ESUtil*/ {
+/*
+ * I have never seen any software framework so casually, recklessly indifferent to atomizing
+ * backward compatibility as elasticsearch
+  private static final Logger LOG = LoggerFactory.getLogger(ESUtilImpl_2_4.class);
   
-  public SearchResponse search(String index, String queryString) throws UnknownHostException {
+  public SearchResponse search(String index, String queryString) throws SearchException {
     try (Client client = getClient()) {
       SearchResponse resp = client.prepareSearch(index).setTypes("doc").setSearchType(SearchType.DEFAULT)
         .setQuery(QueryBuilders.queryStringQuery(queryString))
         .execute().actionGet();
       return resp;
+    } catch (UnknownHostException e) {
+      throw new SearchException("Error searching", e);
     }
   }
   
-  public void indexTestDocs(String index) throws UnknownHostException, JsonProcessingException, IOException {
+  public void indexTestDocs(String index) throws SearchException {
     try (Client client = getClient()) {
       ObjectMapper mapper = new ObjectMapper();
       String jsonFile = System.getProperty("user.dir") + "/src/main/resources/docs.json";
@@ -54,6 +58,12 @@ public class ESTransport {
       BulkRequestBuilder bulkBuilder = client.prepareBulk();
       for (JsonNode node : docs) {
         LOG.info(node.get("docid").asText());
+        Iterator<String> it = node.fieldNames();
+        StringBuffer sb = new StringBuffer();
+        while (it.hasNext()) {
+          sb.append(it.next()).append(", ");
+        }
+        LOG.info(sb.toString());
         bulkBuilder.add(client.prepareIndex(index, "doc", node.get("docid").asText())
           .setSource(mapper.writeValueAsBytes(node)));
         try {
@@ -71,10 +81,12 @@ public class ESTransport {
           LOG.info(itemResp.getFailureMessage());
         }
       }
+    } catch (IOException e) {
+      throw new SearchException("Error indexing", e);
     }
   }
   
-  public boolean createIndex(String index) throws UnknownHostException {
+  public boolean createIndex(String index) throws SearchException {
     try (Client client = getClient()) {
       if (isIndexExists(client, index)) {
         LOG.info("Index " + index + " already exists, no need to create");
@@ -85,13 +97,14 @@ public class ESTransport {
         LOG.info("Index " + index + " created");
         return true;
       } else {
-        throw new RuntimeException("Error creating index");
+        throw new SearchException("Error creating index: ack is false");
       }
+    } catch (UnknownHostException e) {
+      throw new SearchException("Error creating index", e);
     }
   }
   
-  public void createMappings(String index, String mappingsFile) throws UnknownHostException, 
-    JsonProcessingException, IOException {
+  public void createMappings(String index, String mappingsFile) throws SearchException {
     try (Client client = getClient()) {
       InputStream is = new FileInputStream(new File(mappingsFile));
       XContentParser parser = XContentFactory.xContent(XContentType.JSON).createParser(is);
@@ -99,20 +112,35 @@ public class ESTransport {
         .setSource(parser.mapOrdered())
         .execute().actionGet().isAcknowledged();
       LOG.info("Mappings were " + (ack ? "" : "not ") + "created");
+    } catch (IOException e) {
+      throw new SearchException("Error creating mappings", e);
     }
-    
   }
   
-  public void createAlias(Client client, String index, String alias) throws UnknownHostException {
-    IndicesAliasesResponse resp = client.admin().indices().prepareAliases().addAlias(index, alias).get();
-    LOG.info("Alias creation ack: " + resp.isAcknowledged());
+  public void createAlias(String index, String alias) throws SearchException {
+    try (Client client = getClient()) {
+      IndicesAliasesResponse resp = client.admin().indices().prepareAliases().addAlias(index, alias).get();
+      LOG.info("Alias creation ack: " + resp.isAcknowledged());
+    } catch (UnknownHostException e) {
+      throw new SearchException("Error creating alias", e);
+    }
   }
   
-  private boolean isIndexExists(Client client, String index) throws UnknownHostException {
+  public boolean isIndexExists(String index) throws SearchException {
+    try (Client client = getClient()) {
+      return isIndexExists(client, index);
+    } catch (UnknownHostException e) {
+      throw new SearchException("Error getting index", e);
+    }
+  }
+  
+  private boolean isIndexExists(Client client, String index) throws SearchException {
     return getMetaData(client).index(index) != null;
   }
   
-  private MetaData getMetaData(Client client) throws UnknownHostException {
+  
+  
+  private MetaData getMetaData(Client client) throws SearchException {
     return client.admin().cluster().prepareState().execute().actionGet().getState().getMetaData();
   }
   
@@ -122,5 +150,7 @@ public class ESTransport {
     TransportClient client = TransportClient.builder().build()
       .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(host), port));
     return client;
+    return null;
   }
+  */
 }

@@ -31,4 +31,5 @@ task wrapper(type:Wrapper) {
 dependencies(LIBS.springboot)
 dependencies(LIBS.springbootThymeleaf)
 dependencies(LIBS.elasticsearch)
+dependencies(LIBS.commonsio)
 dependencies(LIBS.logging)

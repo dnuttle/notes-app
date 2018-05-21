@@ -1,0 +1,19 @@
+{
+  "properties": {
+    "docid": {
+      "type":"keyword"
+    },
+    "title": {
+      "type":"text"
+    },
+    "category": {
+      "type":"keyword"
+    },
+    "tags": {
+      "type":"text"
+    },
+    "document": {
+      "type":"text"
+    }
+  }
+}

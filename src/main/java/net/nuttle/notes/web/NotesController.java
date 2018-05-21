@@ -1,6 +1,5 @@
 package net.nuttle.notes.web;
 
-import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.nuttle.notes.es.ESTransport;
+import net.nuttle.notes.es.ESUtil;
 
 
 @Controller
@@ -21,7 +20,7 @@ public class NotesController {
   private static final Logger LOG = LoggerFactory.getLogger(NotesController.class);
   
   @Autowired
-  ESTransport esUtil;
+  ESUtil esUtil;
 
   @RequestMapping(value="/test")
   @ResponseBody
@@ -29,13 +28,13 @@ public class NotesController {
     return "<html><body>Notes App</body></html>";
   }
   
-  @RequestMapping(value="/es")
+  @RequestMapping(value="/create")
   @ResponseBody
-  public String es() {
+  public String create() {
     try {
       boolean created = esUtil.createIndex("notes");
       if (created) {
-        esUtil.createMappings("notes", System.getProperty("user.dir") + "/src/main/resources/mappings.json");
+        esUtil.createMappings("notes", System.getProperty("user.dir") + "/src/main/resources/mappings_6_1_1.json");
         return "Created notes index";
       } else {
         return "Notes index already exists";
