@@ -9,6 +9,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
@@ -23,6 +25,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -30,12 +33,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import net.nuttle.notes.Note;
+import net.nuttle.notes.ui.MarkdownRenderer;
 
 @Service
 public class ESUtilImpl_6_1_1 implements ESUtil {
   
-  private static final Logger LOG = LoggerFactory.getLogger(ESUtilImpl_6_1_1.class);
   public static final String TYPE = "note";
+  private static final Logger LOG = LoggerFactory.getLogger(ESUtilImpl_6_1_1.class);
+  private MarkdownRenderer renderer;
+  
+  @Autowired
+  public ESUtilImpl_6_1_1(MarkdownRenderer renderer) {
+    this.renderer = renderer;
+  }
 
   @Override
   public SearchResponse search(String index, String query) throws SearchException {
@@ -47,6 +57,18 @@ public class ESUtilImpl_6_1_1 implements ESUtil {
       return client.search(req);
     } catch (IOException e) {
       throw new SearchException("Error searching", e);
+    }
+  }
+  
+  @Override
+  public String fetch(String index, String id) throws SearchException {
+    try (RestHighLevelClient client = getClient()) {
+      GetRequest req = new GetRequest(index, TYPE, id);
+      GetResponse resp = client.get(req);
+      String note = (String) resp.getSource().get("note");
+      return renderer.renderToHTML(note);
+    } catch (IOException e) {
+      throw new SearchException("Error fetching note", e);
     }
   }
   

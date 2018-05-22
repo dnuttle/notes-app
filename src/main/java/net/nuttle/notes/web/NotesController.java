@@ -74,12 +74,12 @@ public class NotesController {
     }
   }
   
-  @RequestMapping(value="/update/{noteid}", method=RequestMethod.POST)
+  @RequestMapping(value="/update/{id}", method=RequestMethod.POST)
   @ResponseBody
-  public String update(@PathVariable("noteid") String noteid, @RequestBody String note) {
+  public String update(@PathVariable("id") String id, @RequestBody String note) {
     try {
       LOG.info(note.toString());
-      esUtil.update("notes", noteid, note);
+      esUtil.update("notes", id, note);
       return "Updating note";
     } catch (Exception e) {
       LOG.error("Error updating note", e);
@@ -91,14 +91,23 @@ public class NotesController {
   @ResponseBody
   public SearchResponse search() {
     try {
-      ObjectMapper mapper = new ObjectMapper();
-      //mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-      //return mapper.writeValueAsString(esUtil.search("notes", "*:*").getHits());
       return esUtil.search("notes", "*:*");
-      //return esUtil.search("notes", "*:*");
     } catch (Exception e) {
       LOG.error("Error searching", e);
       return null;
     }
   }
+  
+  @RequestMapping(value="/fetch/{id}", method=RequestMethod.GET)
+  @ResponseBody
+  public String fetch(@PathVariable("id") String id) {
+    try {
+      return esUtil.fetch("notes", id);
+    } catch (Exception e) {
+      LOG.error("Error fetching", e);
+      return "Error fetching";
+    }
+  }
+  
+  //TODO index endpoint should persist note to JSON file
 }

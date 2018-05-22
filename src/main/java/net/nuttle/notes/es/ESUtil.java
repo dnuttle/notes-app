@@ -8,6 +8,8 @@ public interface ESUtil {
 
   SearchResponse search(String index, String query) throws SearchException;
   
+  String fetch(String index, String noteid) throws SearchException;
+  
   void indexTestNotes(String index) throws SearchException;
   
   void index(String index, Note note) throws SearchException;
@@ -21,4 +23,6 @@ public interface ESUtil {
   void createAlias(String index, String alias) throws SearchException;
   
   boolean isIndexExists(String index) throws SearchException;
+  
+
 }
