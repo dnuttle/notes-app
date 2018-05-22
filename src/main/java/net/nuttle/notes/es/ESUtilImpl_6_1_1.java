@@ -6,7 +6,6 @@ import java.io.StringWriter;
 import java.util.Hashtable;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -14,6 +13,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
@@ -29,16 +29,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
+import net.nuttle.notes.Note;
+
 @Service
 public class ESUtilImpl_6_1_1 implements ESUtil {
   
   private static final Logger LOG = LoggerFactory.getLogger(ESUtilImpl_6_1_1.class);
-  public static final String TYPE = "doc";
+  public static final String TYPE = "note";
 
   @Override
   public SearchResponse search(String index, String query) throws SearchException {
-    try (RestHighLevelClient client = getClient()){
-      SearchRequest req = new SearchRequest();
+    try (RestHighLevelClient client = getClient()) {
+      SearchRequest req = new SearchRequest(index);
       SearchSourceBuilder builder = new SearchSourceBuilder();
       builder.query(QueryBuilders.queryStringQuery(query));
       req.source(builder);
@@ -49,19 +51,46 @@ public class ESUtilImpl_6_1_1 implements ESUtil {
   }
   
   @Override
-  public void indexTestDocs(String index) throws SearchException {
+  public void index(String index, Note note) throws SearchException {
     try (RestHighLevelClient client = getClient()) {
       ObjectMapper mapper = new ObjectMapper();
-      String jsonFile = System.getProperty("user.dir") + "/src/main/resources/docs.json";
-      ArrayNode docs = (ArrayNode) mapper.readTree(new File(jsonFile));
-      for (JsonNode node : docs) {
+      JsonNode node = mapper.valueToTree(note);
+      IndexRequest req = new IndexRequest(index, TYPE);
+      req.source(node, XContentType.JSON);
+      IndexResponse resp = client.index(req);
+      LOG.info("Indexed ID: " + resp.getId());
+    } catch (IOException e) {
+      throw new SearchException("Error indexing note", e);
+    }
+  }
+  
+  @Override
+  public void update(String index, String noteid, String note) throws SearchException {
+    try (RestHighLevelClient client = getClient()) {
+      ObjectMapper mapper = new ObjectMapper();
+      JsonNode node = mapper.valueToTree(note);
+      UpdateRequest req = new UpdateRequest(index, TYPE, noteid);
+      LOG.info("JSON: " + note);
+      req.doc(note, XContentType.JSON);
+      client.update(req);
+    } catch (IOException e) {
+      throw new SearchException("Error updating note", e);
+    }
+  }
+  
+  public void indexTestNotes(String index) throws SearchException {
+    try (RestHighLevelClient client = getClient()) {
+      ObjectMapper mapper = new ObjectMapper();
+      String jsonFile = System.getProperty("user.dir") + "/src/main/resources/notes.json";
+      ArrayNode notes = (ArrayNode) mapper.readTree(new File(jsonFile));
+      for (JsonNode node : notes) {
         IndexRequest req = new IndexRequest(index, TYPE);
         req.source(mapper.writeValueAsString(node), XContentType.JSON);
         IndexResponse resp = client.index(req);
         LOG.info("Indexed ID: " + resp.getId()); 
       }
     } catch (IOException e) {
-      throw new SearchException("Error indexing test docs", e);
+      throw new SearchException("Error indexing test notes", e);
     }
     return;
   }

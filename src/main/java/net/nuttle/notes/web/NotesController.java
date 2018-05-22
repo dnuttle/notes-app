@@ -1,16 +1,21 @@
 package net.nuttle.notes.web;
 
+import org.elasticsearch.action.search.SearchResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.nuttle.notes.Note;
 import net.nuttle.notes.es.ESUtil;
 
 
@@ -45,25 +50,51 @@ public class NotesController {
     }
   }
   
-  @RequestMapping(value="/index") 
+  @RequestMapping(value="/indexTestNotes") 
   @ResponseBody
-  public String index() {
+  public String indexTestNotes() {
     try {
-      esUtil.indexTestDocs("notes");
-      return "Indexed test docs";
+      esUtil.indexTestNotes("notes");
+      return "Indexed test notes";
     } catch (Exception e) {
-      LOG.error("Error creating index", e);
-      return "Error indexing test docs";
+      LOG.error("Error indexing test notes", e);
+      return "Error indexing test notes";
     }
   }
   
+  @RequestMapping(value="/index", method=RequestMethod.PUT)
+  @ResponseBody
+  public String index(@RequestBody Note note) {
+    try {
+      esUtil.index("notes", note);
+      return "Indexing note";
+    } catch (Exception e) {
+      LOG.error("Error indexing note", e);
+      return "Error indexing note";
+    }
+  }
+  
+  @RequestMapping(value="/update/{noteid}", method=RequestMethod.POST)
+  @ResponseBody
+  public String update(@PathVariable("noteid") String noteid, @RequestBody String note) {
+    try {
+      LOG.info(note.toString());
+      esUtil.update("notes", noteid, note);
+      return "Updating note";
+    } catch (Exception e) {
+      LOG.error("Error updating note", e);
+      return "Error updating note";
+    }
+  }
+
   @RequestMapping(value="/search")
   @ResponseBody
-  public String search() {
+  public SearchResponse search() {
     try {
       ObjectMapper mapper = new ObjectMapper();
-      mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-      return mapper.writeValueAsString(esUtil.search("notes", "*:*").getHits());
+      //mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+      //return mapper.writeValueAsString(esUtil.search("notes", "*:*").getHits());
+      return esUtil.search("notes", "*:*");
       //return esUtil.search("notes", "*:*");
     } catch (Exception e) {
       LOG.error("Error searching", e);

@@ -1,6 +1,6 @@
 {
   "properties": {
-    "docid": {
+    "noteid": {
       "type":"keyword"
     },
     "title": {
@@ -12,7 +12,7 @@
     "tags": {
       "type":"text"
     },
-    "document": {
+    "note": {
       "type":"text"
     }
   }
