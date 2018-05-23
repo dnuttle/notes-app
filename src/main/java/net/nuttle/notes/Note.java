@@ -12,6 +12,10 @@ public class Note {
     return noteid;
   }
   
+  public void setNoteid(String noteid) {
+    this.noteid = noteid;
+  }
+  
   public String getTitle() {
     return title;
   }

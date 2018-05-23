@@ -11,12 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import net.nuttle.notes.Note;
 import net.nuttle.notes.es.ESUtil;
+import net.nuttle.notes.io.FileUtil;
 
 
 @Controller
@@ -26,6 +23,9 @@ public class NotesController {
   
   @Autowired
   ESUtil esUtil;
+  
+  @Autowired
+  FileUtil archiveUtil;
 
   @RequestMapping(value="/test")
   @ResponseBody
@@ -66,7 +66,9 @@ public class NotesController {
   @ResponseBody
   public String index(@RequestBody Note note) {
     try {
+      note.setNoteid("" + System.currentTimeMillis());
       esUtil.index("notes", note);
+      archiveUtil.archive(note);
       return "Indexing note";
     } catch (Exception e) {
       LOG.error("Error indexing note", e);

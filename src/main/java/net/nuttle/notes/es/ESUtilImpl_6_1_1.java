@@ -73,20 +73,6 @@ public class ESUtilImpl_6_1_1 implements ESUtil {
   }
   
   @Override
-  public void index(String index, Note note) throws SearchException {
-    try (RestHighLevelClient client = getClient()) {
-      ObjectMapper mapper = new ObjectMapper();
-      JsonNode node = mapper.valueToTree(note);
-      IndexRequest req = new IndexRequest(index, TYPE);
-      req.source(node, XContentType.JSON);
-      IndexResponse resp = client.index(req);
-      LOG.info("Indexed ID: " + resp.getId());
-    } catch (IOException e) {
-      throw new SearchException("Error indexing note", e);
-    }
-  }
-  
-  @Override
   public void update(String index, String noteid, String note) throws SearchException {
     try (RestHighLevelClient client = getClient()) {
       ObjectMapper mapper = new ObjectMapper();
@@ -97,6 +83,20 @@ public class ESUtilImpl_6_1_1 implements ESUtil {
       client.update(req);
     } catch (IOException e) {
       throw new SearchException("Error updating note", e);
+    }
+  }
+  
+  @Override
+  public void index(String index, Note note) throws SearchException {
+    try (RestHighLevelClient client = getClient()) {
+      ObjectMapper mapper = new ObjectMapper();
+      JsonNode node = mapper.valueToTree(note);
+      IndexRequest req = new IndexRequest(index, TYPE);
+      req.source(mapper.writeValueAsString(node), XContentType.JSON);
+      IndexResponse resp = client.index(req);
+      LOG.info("Indexed ID: " + resp.getId());
+    } catch (IOException e) {
+      throw new SearchException("Error indexing note", e);
     }
   }
   
