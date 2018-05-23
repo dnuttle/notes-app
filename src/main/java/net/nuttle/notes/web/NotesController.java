@@ -102,6 +102,7 @@ public class NotesController {
   @ResponseBody
   public String fetch(@PathVariable("id") String id) {
     try {
+      LOG.info("Fetching " + id);
       return esUtil.fetch("notes", id);
     } catch (Exception e) {
       LOG.error("Error fetching", e);
