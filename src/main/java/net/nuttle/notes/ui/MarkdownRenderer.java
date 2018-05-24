@@ -21,6 +21,8 @@ public class MarkdownRenderer {
   public String renderToHTML(String md) {
     Node note = parser.parse(md);
     String body = renderer.render(note);
+    return body;
+    /*
     StringBuffer sb = new StringBuffer();
     sb.append("<DOCTYPE html><html><head>")
       .append("<link rel='stylesheet' href='/bootstrap.css'>")
@@ -31,5 +33,6 @@ public class MarkdownRenderer {
       .append("</div></body></html>");
     LOG.info(sb.toString());
     return sb.toString();
+    */
   }
 }

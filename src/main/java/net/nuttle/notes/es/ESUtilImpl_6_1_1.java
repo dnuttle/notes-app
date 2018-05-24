@@ -73,10 +73,23 @@ public class ESUtilImpl_6_1_1 implements ESUtil {
   }
   
   @Override
+  public Note fetchNote(String index, String id) throws SearchException {
+    try (RestHighLevelClient client = getClient()) {
+      GetRequest req = new GetRequest(index, TYPE, id);
+      GetResponse resp = client.get(req);
+      String strNote = (String) resp.getSourceAsString();
+      ObjectMapper mapper = new ObjectMapper();
+      JsonNode node = mapper.readTree(strNote);
+      return mapper.treeToValue(node, Note.class);
+    } catch (IOException e) {
+      throw new SearchException("Error fetching note", e);
+    }
+  }
+  
+  @Override
   public void update(String index, String noteid, String note) throws SearchException {
     try (RestHighLevelClient client = getClient()) {
       ObjectMapper mapper = new ObjectMapper();
-      JsonNode node = mapper.valueToTree(note);
       UpdateRequest req = new UpdateRequest(index, TYPE, noteid);
       LOG.info("JSON: " + note);
       req.doc(note, XContentType.JSON);

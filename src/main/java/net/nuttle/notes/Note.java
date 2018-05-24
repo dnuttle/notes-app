@@ -32,6 +32,10 @@ public class Note {
     return note;
   }
   
+  public void setNote(String note) {
+    this.note = note;
+  }
+
   @Override
   public String toString() {
     StringBuffer sb = new StringBuffer();

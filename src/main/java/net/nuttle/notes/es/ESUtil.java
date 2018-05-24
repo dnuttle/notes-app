@@ -10,6 +10,8 @@ public interface ESUtil {
   
   String fetch(String index, String noteid) throws SearchException;
   
+  Note fetchNote(String index, String noteid) throws SearchException;
+  
   void indexTestNotes(String index) throws SearchException;
   
   void index(String index, Note note) throws SearchException;

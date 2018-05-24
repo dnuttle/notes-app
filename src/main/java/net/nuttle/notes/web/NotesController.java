@@ -10,10 +10,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.sun.javafx.webkit.theme.Renderer;
 
 import net.nuttle.notes.Note;
 import net.nuttle.notes.es.ESUtil;
 import net.nuttle.notes.io.FileUtil;
+import net.nuttle.notes.ui.MarkdownRenderer;
 
 
 @Controller
@@ -26,6 +30,9 @@ public class NotesController {
   
   @Autowired
   FileUtil archiveUtil;
+  
+  @Autowired
+  MarkdownRenderer renderer;
 
   @RequestMapping(value="/test")
   @ResponseBody
@@ -76,6 +83,11 @@ public class NotesController {
     }
   }
   
+  @RequestMapping(value="/add", method=RequestMethod.GET)
+  public ModelAndView add() {
+    return new ModelAndView("add");
+  }
+  
   @RequestMapping(value="/update/{id}", method=RequestMethod.POST)
   @ResponseBody
   public String update(@PathVariable("id") String id, @RequestBody String note) {
@@ -102,13 +114,18 @@ public class NotesController {
   
   @RequestMapping(value="/fetch/{id}", method=RequestMethod.GET)
   @ResponseBody
-  public String fetch(@PathVariable("id") String id) {
+  public ModelAndView fetch(@PathVariable("id") String id) {
     try {
       LOG.info("Fetching " + id);
-      return esUtil.fetch("notes", id);
+      ModelAndView mv = new ModelAndView("note");
+      Note note = esUtil.fetchNote("notes", id);
+      note.setNote(renderer.renderToHTML(note.getNote()));
+      LOG.info(note.toString());
+      mv.addObject("note", note);
+      return mv;
     } catch (Exception e) {
       LOG.error("Error fetching", e);
-      return "Error fetching";
+      return null;
     }
   }
   

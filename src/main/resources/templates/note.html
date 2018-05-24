@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<title>View Note</title>
+<link rel="stylesheet" href="/bootstrap.css"/>
+<style>
+.Note {
+  font-size: 12px;
+  font-family: sans-serif;
+  margin: 12px 8px 8px 0;
+  padding: 16px;
+  border: 1px solid #ccc;
+  box-shadow: 0 1px 2px #eee;
+}
+.Note h1, .Note h2, .Note h3, .Note h4 {
+  font-weight: bold;
+}
+.Note h1 {
+  font-size: 17px;
+}
+.Note h2 {
+  font-size: 15px;
+}
+.Note h3 {
+  font-size: 13px;
+}
+.Note h4 {
+  font-size: 12px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  
+  <h3>View note</h3>
+  <div class="container">
+    <h4>Title</h4>
+    <div th:text="${note.title}"/>
+    <h4>Category</h4>
+    <div th:text="${note.category}"/>
+    <h4>Tags</h4>
+    <div th:text="${note.tags}"/>
+    <h4>Note</h4>
+    <div class="Note" th:utext="${note.note}"/>
+  
+  </div>
+</div>
+</body>
+
+</html>
